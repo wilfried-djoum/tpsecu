@@ -28,7 +28,7 @@ app.post('/register', function (req, res) {
     function validateEmailInput() {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-        if (emailRegex.test(req.body.username)) {
+        if (emailRegex.test(req.body.email)) {
             // email.innerHTML = "Good Email"
             return true
         } else {
