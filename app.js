@@ -89,9 +89,7 @@ app.post('/register', async function (req, res) {
         // sanitize inputs 
 
     }
-
     let isRegistered
-
     // Fonction pour insérer l'utilisateur dans la base de données
     async function addUserToDatabase() {
         // S'il y a des erreurs, les envoyer à la vue
@@ -142,28 +140,18 @@ router.get("/login", function (req, res) {
     res.render('login');
 });
 
-// make an auth with passport 
-app.post('/login', passport.authenticate('local', {
-    // Rediriger en cas de succès
-    successRedirect: '/home',
-    // Rediriger en cas d'échec
-    failureRedirect: '/login',
-    // Afficher les messages d'échec (si connect-flash est utilisé)
-    failureFlash: true
-}
-)
-    // {
+router.get("/users", function (req, res) {
+    res.render('usersResult');
+});
 
-    //     //1- get data 
-    //     console.log(req.body);
 
-    //     //2- authenticate user 
+// Importer les routes
+const authRoutes = require('./routes/authRoute'); // Routes d'authentification
+const userRoutes = require('./routes/userRoutes'); // Routes des utilisateurs
 
-    //     //3- if success redirect to home page 
-    //     //res.render('home');
-
-    // }
-);
+// Utiliser les routes
+app.use(authRoutes);  // Gère les routes de connexion/déconnexion
+app.use(userRoutes);  // Gère les routes des utilisateurs (profil, liste d'utilisateurs)
 
 // Middleware pour protéger les routes
 function ensureAuthenticated(req, res, next) {
@@ -175,14 +163,6 @@ function ensureAuthenticated(req, res, next) {
 // Route protégée
 app.get('/home', ensureAuthenticated, (req, res) => {
     res.render('home', { user: req.user });
-});
-
-// Route de déconnexion
-app.get('/logout', (req, res) => {
-    req.logout(function (err) {
-        if (err) { return next(err); }
-        res.redirect('/login');
-    });
 });
 
 app.use('/', router);

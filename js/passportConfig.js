@@ -6,8 +6,6 @@ const bcrypt = require('bcrypt');
 const User = require('./userModel')
 
 
-
-
 // Configuration de la stratégie locale pour Passport
 passeport.use(new LocalStrategy({
     usernameField: 'email', // Utiliser l'email comme champ d'authentification

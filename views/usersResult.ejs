@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Résultat de la recherche d'utilisateurs</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Liste des utilisateurs</h1>
+
+    <!-- Afficher les informations de l'utilisateur connecté -->
+    <div>
+        <h3>Utilisateur connecté :</h3>
+        <p><strong>Nom d'utilisateur :</strong> <%= user.username %></p>
+        <p><strong>Email :</strong> <%= user.email %></p>
+        <p><strong>Rôle :</strong> <%= user.role %></p>
+    </div>
+
+    <% if (error) { %>
+        <p style="color: red;"><%= error %></p>  <!-- Afficher un message d'erreur s'il y a une erreur -->
+    <% } else { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom d'utilisateur</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(function(user) { %>  <!-- Afficher chaque utilisateur dans un tableau -->
+                    <tr>
+                        <td><%= user.username %></td>
+                        <td><%= user.email %></td>
+                        <td><%= user.role %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } %>
+</body>
+</html>

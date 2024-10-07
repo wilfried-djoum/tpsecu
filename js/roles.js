@@ -1,15 +1,15 @@
-const AccessControl = require("accesscontrol")
+const AccessControl = require("accesscontrol");
 const ac = new AccessControl();
 
 exports.roles = (() => {
-    //utilisateurs standards
+    // Droits pour les utilisateurs standards
     ac.grant('user')
-        .readOnly('profile'); //il peut juste regarder son profil
+        .readOwn('profile'); // L'utilisateur peut uniquement lire son propre profil
 
-    //droits du super administrateur
+    // Droits pour les administrateurs
     ac.grant('admin')
-        .extend('user') //ce dernier herite des droits de l'utilisateur simple
-        .readAny('profile') //il peut lire tous les profiles
+        .extend('user') // L'administrateur hérite des droits de l'utilisateur standard
+        .readAny('profile'); // L'administrateur peut lire tous les profils
 
-    return ac
+    return ac; // Retourner l'objet AccessControl
 })();
