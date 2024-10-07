@@ -4,6 +4,7 @@ const path = require('path');
 //importation des configurations de la base de données
 const mongoDB = require('./js/config')
 const User = require('./js/userModel')
+const role = require('./js/roles')
 
 var app = express();
 
@@ -11,8 +12,21 @@ var app = express();
 mongoDB()
 const router = express.Router();
 
-// Importer les outils de validation
-const { body, validationResult } = require('express-validator');
+//importation des configurations de passeport
+const session = require('express-session');
+const passport = require('./js/passportConfig')
+
+//configurer la session express
+app.use(session({
+    secret: 'key', // ceci c'est la clé pour signaler la session
+    resave: false,
+    saveUninitialized: true
+}));
+
+// Initialiser Passport.js et sessions
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 app.use(express.json()); // Used to parse JSON bodies
 app.use(express.urlencoded()); //Parse URL-encoded bodies
@@ -30,8 +44,6 @@ router.get("/register", function (req, res) {
 });
 
 app.post('/register', async function (req, res) {
-    let error=[]
-
     //1- get data 
     console.log(req.body);
     // check the email format 
@@ -78,6 +90,8 @@ app.post('/register', async function (req, res) {
 
     }
 
+    let isRegistered
+
     // Fonction pour insérer l'utilisateur dans la base de données
     async function addUserToDatabase() {
         // S'il y a des erreurs, les envoyer à la vue
@@ -97,10 +111,13 @@ app.post('/register', async function (req, res) {
             // Enregistrer l'utilisateur dans la base de données
             await newUser.save();
             console.log("Utilisateur enregistré avec succès.");
-            res.status(201).redirect('/login'); // Rediriger vers la page de connexion après inscription réussie
+            res.status(201); // Rediriger vers la page de connexion après inscription réussie
+            isRegistered = true
+
         } catch (err) {
             console.error("Erreur lors de l'enregistrement de l'utilisateur :", err);
             res.status(500).send('Erreur lors de l\'enregistrement de l\'utilisateur.');
+            isRegistered = false
         }
     }
 
@@ -113,6 +130,9 @@ app.post('/register', async function (req, res) {
         res.status(400).send("Données invalides. Veuillez vérifier vos informations.");
     }
     //3- if success redirect to login
+    if (isRegistered) {
+        res.render('login')
+    }
     //res.render('login');
 
 });
@@ -122,16 +142,47 @@ router.get("/login", function (req, res) {
     res.render('login');
 });
 
-app.post('/login', function (req, res) {
+// make an auth with passport 
+app.post('/login', passport.authenticate('local', {
+    // Rediriger en cas de succès
+    successRedirect: '/home',
+    // Rediriger en cas d'échec
+    failureRedirect: '/login',
+    // Afficher les messages d'échec (si connect-flash est utilisé)
+    failureFlash: true
+}
+)
+    // {
 
-    //1- get data 
-    console.log(req.body);
+    //     //1- get data 
+    //     console.log(req.body);
 
-    //2- authenticate user 
+    //     //2- authenticate user 
 
-    //3- if success redirect to home page 
-    //res.render('home');
+    //     //3- if success redirect to home page 
+    //     //res.render('home');
 
+    // }
+);
+
+// Middleware pour protéger les routes
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login');
+}
+// Route protégée
+app.get('/home', ensureAuthenticated, (req, res) => {
+    res.render('home', { user: req.user });
+});
+
+// Route de déconnexion
+app.get('/logout', (req, res) => {
+    req.logout(function (err) {
+        if (err) { return next(err); }
+        res.redirect('/login');
+    });
 });
 
 app.use('/', router);
